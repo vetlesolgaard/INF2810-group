@@ -75,6 +75,11 @@
 ;;kall 3 (mem-fib 4) hele utregningen
 
 ;;1d)
+(define get-value-from-name
+  (lambda (name arguments)
+    (cond ((null? arguments) #f)
+          ((eq? name (car arguments)) (cadr arguments))
+          (else (get-value-from-name name (cddr arguments))))))
 
 (define (eval-args args)
   (cond ((null? args) #f)
@@ -84,6 +89,7 @@
 
 (define greet
   (lambda args
+<<<<<<< HEAD
     (let (time (or (eval-args args) "day"))
       (let (titel
       (cond ((null? args) (display "good day friend"))
@@ -93,4 +99,21 @@
 
 
 ;;fikse denne, time standard skal være day og tittel standard skal være friend. implementer
+=======
+    (let ((time  (or (get-value-from-name 'time args) "day"))
+          (title (or (get-value-from-name 'title args) "friend")))
+      (display "Good ")
+      (display time)
+      (display " ")
+      (display title)
+      (display "."))))
+
+
+(greet 'time "morning")
+
+;;2a)
+
+
+
+>>>>>>> 190153b572b9a55e7bc7a1cc9e48f0eefa07d958
 
