@@ -36,21 +36,22 @@
       ))|#
 
 
-(define (mem message proc)
-  (cond ((eq? message 'memoize)
+(define (mem mess f)
+  (cond ((eq? mess 'memoize)
          (let ((table (make-table)))
            (lambda args
              (display args)(newline)
-             (cond ((and (not(null? args)) (eq? (car args) 'unmemoize)) proc)
+             (cond ((and (not(null? args)) (eq? (car args) 'unmemoize)) f)
                    (else
                     (let ((prev-result (lookup args table)))
                       (or prev-result
-                          (let ((result (apply proc args)))
+                          (let ((result (apply f args)))
                             (insert! args result table)
                             result))))))))
         
-        ((eq? message 'unmemoize) (proc 'unmemoize))
-        (else (display "unknown command"))))
+        ((eq? mess 'unmemoize) (f 'unmemoize))
+        (else (display "unknown command")))
+  )
 
 #|
 (set! fib (mem 'memoize fib))
@@ -65,6 +66,7 @@
 (procedure? (test-proc)) ;;#f
 (set! test-proc (mem 'memoize test-proc))
 (test-proc 40 41 42 43 44)
+
 |#
 
 ;;1c)
@@ -81,25 +83,8 @@
           ((eq? name (car arguments)) (cadr arguments))
           (else (get-value-from-name name (cddr arguments))))))
 
-(define (eval-args args)
-  (cond ((null? args) #f)
-        ((eq? (car args) 'time) (cadr args))
-        ((eq? (car args) 'title) (cadr args))
-        (else (eval-args (cadr args)))))
-
 (define greet
   (lambda args
-<<<<<<< HEAD
-    (let (time (or (eval-args args) "day"))
-      (let (titel
-      (cond ((null? args) (display "good day friend"))
-          (else (eval-args args)))))
-    
-      
-
-
-;;fikse denne, time standard skal være day og tittel standard skal være friend. implementer
-=======
     (let ((time  (or (get-value-from-name 'time args) "day"))
           (title (or (get-value-from-name 'title args) "friend")))
       (display "Good ")
@@ -112,8 +97,4 @@
 (greet 'time "morning")
 
 ;;2a)
-
-
-
->>>>>>> 190153b572b9a55e7bc7a1cc9e48f0eefa07d958
 
