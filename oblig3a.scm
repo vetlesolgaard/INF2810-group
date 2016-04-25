@@ -36,20 +36,20 @@
       ))|#
 
 
-(define (mem mess f)
-  (cond ((eq? mess 'memoize)
+(define (mem message proc)
+  (cond ((eq? message 'memoize)
          (let ((table (make-table)))
            (lambda args
              (display args)(newline)
-             (cond ((and (not(null? args)) (eq? (car args) 'unmemoize)) f)
+             (cond ((and (not(null? args)) (eq? (car args) 'unmemoize)) proc)
                    (else
                     (let ((prev-result (lookup args table)))
                       (or prev-result
-                          (let ((result (apply f args)))
+                          (let ((result (apply proc args)))
                             (insert! args result table)
                             result))))))))
         
-        ((eq? mess 'unmemoize) (f 'unmemoize))
+        ((eq? message 'unmemoize) (proc 'unmemoize))
         (else (display "unknown command")))
   )
 #|
