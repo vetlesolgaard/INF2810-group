@@ -52,8 +52,8 @@
         ((eq? mess 'unmemoize) (f 'unmemoize))
         (else (display "unknown command")))
   )
-
 #|
+
 (set! fib (mem 'memoize fib))
 (fib 3)
 (fib 5)
@@ -66,8 +66,8 @@
 (procedure? (test-proc)) ;;#f
 (set! test-proc (mem 'memoize test-proc))
 (test-proc 40 41 42 43 44)
-
 |#
+
 
 ;;1c)
 ;;Problemet her er at fib peker ikke tilbake på mem-fib, den peker til fibutregningen,
@@ -77,17 +77,19 @@
 ;;kall 3 (mem-fib 4) hele utregningen
 
 ;;1d)
-
+(define (get-value-from-name name args)
+  (cond ((null? args) #f)
+        ((equal? name (car args)) (cadr args))
+        (else (get-value-from-name name (cddr args))))
+  )
 (define greet
-  (lambda x
-    (display "good ")
-    (define (greet-1 args line)
-      (cond ((null? args)(newline))
-            ((eq? (car args) 'time) (greet-1 (cddr args))) 
-            ((eq? (car args) 'title) (greet-1 (cddr args)))
-            (else (display "unknown command"))))
-    (cond ((null? x) (display "day friend"))
-          (else (greet-1 x)))))
+  (lambda args
+    (let ((time (or (get-value-from-name 'time args) "day"))
+          (title (or (get-value-from-name 'title args) "friend")))
+      (display "good ")
+      (display time)
+      (display " ")
+      (display title))))
           
 ;;fikse denne, time standard skal være day og tittel standard skal være friend. implementer
 
