@@ -36,21 +36,22 @@
       ))|#
 
 
-(define (mem message proc)
-  (cond ((eq? message 'memoize)
+(define (mem mess f)
+  (cond ((eq? mess 'memoize)
          (let ((table (make-table)))
            (lambda args
              (display args)(newline)
-             (cond ((and (not(null? args)) (eq? (car args) 'unmemoize)) proc)
+             (cond ((and (not(null? args)) (eq? (car args) 'unmemoize)) f)
                    (else
                     (let ((prev-result (lookup args table)))
                       (or prev-result
-                          (let ((result (apply proc args)))
+                          (let ((result (apply f args)))
                             (insert! args result table)
                             result))))))))
         
-        ((eq? message 'unmemoize) (proc 'unmemoize))
-        (else (display "unknown command"))))
+        ((eq? mess 'unmemoize) (f 'unmemoize))
+        (else (display "unknown command")))
+  )
 
 #|
 (set! fib (mem 'memoize fib))
@@ -65,6 +66,7 @@
 (procedure? (test-proc)) ;;#f
 (set! test-proc (mem 'memoize test-proc))
 (test-proc 40 41 42 43 44)
+
 |#
 
 ;;1c)
@@ -76,21 +78,16 @@
 
 ;;1d)
 
-(define (eval-args args)
-  (cond ((null? args) #f)
-        ((eq? (car args) 'time) (cadr args))
-        ((eq? (car args) 'title) (cadr args))
-        (else (eval-args (cadr args)))))
-
 (define greet
-  (lambda args
-    (let (time (or (eval-args args) "day"))
-      (let (titel
-      (cond ((null? args) (display "good day friend"))
-          (else (eval-args args)))))
-    
-      
-
-
+  (lambda x
+    (display "good ")
+    (define (greet-1 args line)
+      (cond ((null? args)(newline))
+            ((eq? (car args) 'time) (greet-1 (cddr args))) 
+            ((eq? (car args) 'title) (greet-1 (cddr args)))
+            (else (display "unknown command"))))
+    (cond ((null? x) (display "day friend"))
+          (else (greet-1 x)))))
+          
 ;;fikse denne, time standard skal være day og tittel standard skal være friend. implementer
 
