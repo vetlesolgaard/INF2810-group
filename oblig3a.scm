@@ -97,5 +97,9 @@
 (greet 'time "morning")
 
 ;;2a)
+(define list-to-stream
+  (lambda (args)
+    (cons-stream (car args) (cadr args))))
+    
 
 
