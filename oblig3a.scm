@@ -99,7 +99,8 @@
 ;;2a)
 (define list-to-stream
   (lambda (args)
-    (cons-stream (car args) (cadr args))))
-    
-
-
+    (cons-stream (car args) (list-to-stream (cdr args)))))
+(define streamtest (list-to-stream '(1 2 3 4 5)))
+streamtest
+(stream-cdr streamtest)
+(stream-cdr (stream-cdr streamtest))
