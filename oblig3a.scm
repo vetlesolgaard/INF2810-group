@@ -54,22 +54,6 @@
         ((eq? message 'unmemoize) (proc 'unmemoize))
         (else (display "unknown command")))
   )
-#|
-
-(set! fib (mem 'memoize fib))
-(fib 3)
-(fib 5)
-(set! fib (mem 'unmemoize fib))
-(fib 3)
-(fib 5)
-
-(procedure? fib)
-
-(procedure? (test-proc)) ;;#f
-(set! test-proc (mem 'memoize test-proc))
-(test-proc 40 41 42 43 44)
-|#
-
 
 ;;1c)
 ;;Problemet her er at fib peker ikke tilbake på mem-fib, den peker til fibutregningen,
@@ -96,16 +80,28 @@
       (display "."))))
 
 ;;2a)
+(define list '(1 2 3 4 5))
 
 (define list-to-stream
   (lambda (args)
-    (cons-stream (car args) (list-to-stream (cdr args)))))
+    (if (null? args)
+        '()
+        (cons-stream (car args) (list-to-stream (cdr args))))))
 
-#|
 (define streamtest (list-to-stream '(1 2 3 4 5)))
 streamtest
-(stream-cdr streamtest)
-(stream-cdr (stream-cdr streamtest))
-|#
 
+(define stream-to-list
+  (lambda (stream . count)
+    (cond ((null? stream) '())
+          ((null? count) (cons
+                          (stream-car stream)
+                          (stream-to-list (stream-cdr stream))))          
+          ((zero? (car count)) '())
+          (else (cons
+                 (stream-car stream)
+                 (stream-to-list (stream-cdr stream) (- (car count) 1)))))))
+
+(define list (stream-to-list streamtest))
+(stream-to-list nats 30)
 
