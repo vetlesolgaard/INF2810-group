@@ -1,4 +1,6 @@
 (load "prekode3a.scm")
+
+
 (define (memoize f)
   (let ((table (make-table)))
     (lambda (x)
@@ -93,9 +95,14 @@
       (display title)
       (display "."))))
 
-
-(greet 'time "morning")
-
 ;;2a)
+
+(define (list-to-stream list)
+  (cons-stream (car list) (list-to-stream (cdr list))))
+
+;;(define stream-to-list
+;;  (lambda (stream count)
+;;    ))  
+  
 
 
