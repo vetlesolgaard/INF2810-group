@@ -99,27 +99,30 @@
 
 (define list-to-stream
   (lambda (args)
-    (cons-stream (car args) (list-to-stream (cdr args)))))
+    (if (null? (cdr args))
+        (cons-stream (car args) '())
+        (cons-stream (car args) (list-to-stream (cdr args))))))
 
-#|
+
 (define streamtest (list-to-stream '(1 2 3 4 5)))
 streamtest
 (stream-cdr streamtest)
 (stream-cdr (stream-cdr streamtest))
-<<<<<<< HEAD
+(stream-cdr (stream-cdr (stream-cdr streamtest)))
+(stream-cdr (stream-cdr (stream-cdr (stream-cdr streamtest))))
+(null? (stream-cdr (stream-cdr (stream-cdr (stream-cdr (stream-cdr streamtest))))))
+
 (define stream-to-list
   (lambda (stream . args)
-    (cond ((and (null? args) (not(stream-null? stream)))
-           (cons (stream-car stream) (stream-to-list (stream-cdr stream))))
-          ((and (not(null? args)) (not(= 0 (car args))))
+    (cond ((and (not(null? args)) (not(= 0 (car args))))
            (cons (stream-car stream) (stream-to-list (stream-cdr stream) (- (car args) 1))))
+          ((and (null? args) (not(stream-null? stream)))
+           (cons (stream-car stream) (stream-to-list (stream-cdr stream))))
+          
           (else '()))
     ))
 (stream-interval 10 20)
 (stream-to-list (stream-interval 10 20))
 (stream-to-list nats 10)
-=======
-|#
-
->>>>>>> 1c6229aa2ef70d1729cee4f250fe3ae44e1cd2cf
+(stream-to-list streamtest)
 
