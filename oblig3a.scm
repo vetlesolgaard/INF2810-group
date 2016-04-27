@@ -97,12 +97,15 @@
 
 ;;2a)
 
-(define (list-to-stream list)
-  (cons-stream (car list) (list-to-stream (cdr list))))
+(define list-to-stream
+  (lambda (args)
+    (cons-stream (car args) (list-to-stream (cdr args)))))
 
-;;(define stream-to-list
-;;  (lambda (stream count)
-;;    ))  
-  
+#|
+(define streamtest (list-to-stream '(1 2 3 4 5)))
+streamtest
+(stream-cdr streamtest)
+(stream-cdr (stream-cdr streamtest))
+|#
 
 
