@@ -20,24 +20,6 @@
                             (memo-fib (- n 2))))))))
 
 ;;1a)
-#|(define mem
-  (lambda (mess f)
-      (if(eq? mess 'memoize)
-          (let ((table (make-table)))
-            (lambda args
-              (if (not(pair? args))
-                  f
-                  (let ((prev-result (lookup args table)))
-                    (or prev-result
-                        (let ((result (apply f args)))
-                          (insert! args result table)
-                          result))))))
-          
-          (f))
-          
-      ))|#
-
-
 (define (mem message proc)
   (cond ((eq? message 'memoize)
          (let ((table (make-table)))
@@ -52,8 +34,7 @@
                             result))))))))
         
         ((eq? message 'unmemoize) (proc 'unmemoize))
-        (else (display "unknown command")))
-  )
+        (else (display "unknown command"))))
 
 ;;1c)
 ;;Problemet her er at fib peker ikke tilbake på mem-fib, den peker til fibutregningen,
@@ -88,9 +69,6 @@
         '()
         (cons-stream (car args) (list-to-stream (cdr args))))))
 
-(define streamtest (list-to-stream '(1 2 3 4 5)))
-streamtest
-
 (define stream-to-list
   (lambda (stream . count)
     (cond ((null? stream) '())
@@ -101,7 +79,4 @@ streamtest
           (else (cons
                  (stream-car stream)
                  (stream-to-list (stream-cdr stream) (- (car count) 1)))))))
-
-(define list (stream-to-list streamtest))
-(stream-to-list nats 30)
 
