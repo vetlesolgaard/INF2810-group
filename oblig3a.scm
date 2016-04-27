@@ -66,17 +66,38 @@
 (define list-to-stream
   (lambda (args)
     (if (null? args)
-        '()
+        the-empty-stream
         (cons-stream (car args) (list-to-stream (cdr args))))))
 
 (define stream-to-list
   (lambda (stream . count)
-    (cond ((null? stream) '())
+    (cond ((stream-null? stream) the-empty-stream)
           ((null? count) (cons
                           (stream-car stream)
                           (stream-to-list (stream-cdr stream))))          
-          ((zero? (car count)) '())
+          ((zero? (car count)) the-empty-stream)
           (else (cons
                  (stream-car stream)
                  (stream-to-list (stream-cdr stream) (- (car count) 1)))))))
+
+(define empty-streams
+  (lambda (args)
+    (if(stream-null? (cdr args))
+       (stream-null? (car args))
+       (or (stream-null? (car args)) (empty-streams (cdr args))))))
+
+(define (stream-map proc . argstreams)
+  (if (empty-streams argstreams)
+      the-empty-stream
+      (cons-stream
+       (apply proc (map stream-car argstreams))
+       (apply stream-map
+              (cons proc (map stream-cdr argstreams))))))
+(define x (list-to-stream '(1 2 3 4 5)))
+(define y (list-to-stream '(1 2 3 4)))
+(define bar (stream-map + x y y))
+bar
+(stream-cdr (stream-cdr (stream-cdr (stream-cdr bar))))
+(stream-cdr (stream-cdr (stream-cdr (stream-cdr y))))
+bar
 
