@@ -104,3 +104,15 @@
 streamtest
 (stream-cdr streamtest)
 (stream-cdr (stream-cdr streamtest))
+(define stream-to-list
+  (lambda (stream . args)
+    (cond ((and (null? args) (not(stream-null? stream)))
+           (cons (stream-car stream) (stream-to-list (stream-cdr stream))))
+          ((and (not(null? args)) (not(= 0 (car args))))
+           (cons (stream-car stream) (stream-to-list (stream-cdr stream) (- (car args) 1))))
+          (else '()))
+    ))
+(stream-interval 10 20)
+(stream-to-list (stream-interval 10 20))
+(stream-to-list nats 10)
+
