@@ -79,7 +79,7 @@
           (else (cons
                  (stream-car stream)
                  (stream-to-list (stream-cdr stream) (- (car count) 1)))))))
-
+;;1b)
 (define empty-streams
   (lambda (args)
     (if(stream-null? (cdr args))
@@ -101,3 +101,40 @@ bar
 (stream-cdr (stream-cdr (stream-cdr (stream-cdr y))))
 bar
 
+;;1c) Du vil få et stort problem med uendelige strømmer. Den vil aldri stoppe å søke etter duplikater.
+
+(define (remove-duplicates-stream lst)
+  (cond ((stream-null? lst) the-empty-stream)
+        ((not (memq-stream (stream-car lst) (stream-cdr lst)))
+         (cons-stream (stream-car lst) (remove-duplicates-stream (stream-cdr lst))))
+        (else (remove-duplicates-stream (stream-cdr lst)))))
+
+
+(define (memq-stream item x)
+  (cond ((stream-null? x) #f)
+        ((eq? item (stream-car x)) x)
+        (else (memq-stream item (stream-cdr x)))))
+(define instream (list-to-stream '(1 1 1 2 2 3 4 3 4 6 5 4 3 1 4 2)))
+(define test (remove-duplicates-stream instream))
+(display test)
+test
+(stream-cdr test)
+(stream-cdr (stream-cdr test))
+(stream-cdr (stream-cdr (stream-cdr test)))
+(stream-cdr (stream-cdr (stream-cdr (stream-cdr test))))
+(stream-cdr (stream-cdr (stream-cdr (stream-cdr (stream-cdr test)))))
+
+(define (remove-duplicates lst)
+  (cond ((null? lst) '())
+        ((not (memqa (car lst) (cdr lst)))
+         (cons (car lst) (remove-duplicates (cdr lst))))
+        (else (remove-duplicates (cdr lst)))))
+
+(define (memqa item x)
+  (cond ((null? x) #f)
+        ((eq? item (car x)) x)
+        (else (memqa item (cdr x)))))
+(define test (remove-duplicates '(1 2 4 3 3 4 2 1 1 2 3 3 2)))
+test
+
+;;1d)
