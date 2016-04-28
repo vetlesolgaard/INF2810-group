@@ -79,7 +79,7 @@
           (else (cons
                  (stream-car stream)
                  (stream-to-list (stream-cdr stream) (- (car count) 1)))))))
-;;1b)
+;;2b)
 (define empty-streams
   (lambda (args)
     (if(stream-null? (cdr args))
@@ -101,7 +101,7 @@ bar
 (stream-cdr (stream-cdr (stream-cdr (stream-cdr y))))
 bar
 
-;;1c) Du vil få et stort problem med uendelige strømmer. Den vil aldri stoppe å søke etter duplikater.
+;;2c) Du vil få et stort problem med uendelige strømmer. Den vil aldri stoppe å søke etter duplikater.
 
 (define (remove-duplicates-stream lst)
   (cond ((stream-null? lst) the-empty-stream)
@@ -137,4 +137,14 @@ test
 (define test (remove-duplicates '(1 2 4 3 3 4 2 1 1 2 3 3 2)))
 test
 
-;;1d)
+;;2d)
+
+(define (remove-duplicates stream)
+  (if (stream-null? stream)
+      the-empty-stream
+      (cons-stream (stream-car stream)
+                   (stream-filter <???>
+                                  (stream-cdr stream)))))
+(define a (remove-duplicates (list-to-stream '(1 2 4 3 3 4 2 1 1 2 3 3 2))))
+a
+(stream-cdr a)
