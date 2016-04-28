@@ -1,3 +1,5 @@
+
+
 (load "prekode3a.scm")
 
 
@@ -61,7 +63,6 @@
       (display "."))))
 
 ;;2a)
-(define list '(1 2 3 4 5))
 
 (define list-to-stream
   (lambda (args)
@@ -80,71 +81,47 @@
                  (stream-car stream)
                  (stream-to-list (stream-cdr stream) (- (car count) 1)))))))
 ;;2b)
-(define empty-streams
+(define empty-streams?
   (lambda (args)
     (if(stream-null? (cdr args))
        (stream-null? (car args))
-       (or (stream-null? (car args)) (empty-streams (cdr args))))))
+       (or (stream-null? (car args)) (empty-streams? (cdr args))))))
 
 (define (stream-map proc . argstreams)
-  (if (empty-streams argstreams)
+  (if (empty-streams? argstreams)
       the-empty-stream
       (cons-stream
        (apply proc (map stream-car argstreams))
        (apply stream-map
               (cons proc (map stream-cdr argstreams))))))
-(define x (list-to-stream '(1 2 3 4 5)))
-(define y (list-to-stream '(1 2 3 4)))
-(define bar (stream-map + x y y))
-bar
-(stream-cdr (stream-cdr (stream-cdr (stream-cdr bar))))
-(stream-cdr (stream-cdr (stream-cdr (stream-cdr y))))
-bar
-
-;;2c) Du vil få et stort problem med uendelige strømmer. Den vil aldri stoppe å søke etter duplikater.
-
-(define (remove-duplicates-stream lst)
-  (cond ((stream-null? lst) the-empty-stream)
-        ((not (memq-stream (stream-car lst) (stream-cdr lst)))
-         (cons-stream (stream-car lst) (remove-duplicates-stream (stream-cdr lst))))
-        (else (remove-duplicates-stream (stream-cdr lst)))))
 
 
-(define (memq-stream item x)
-  (cond ((stream-null? x) #f)
-        ((eq? item (stream-car x)) x)
-        (else (memq-stream item (stream-cdr x)))))
-(define instream (list-to-stream '(1 1 1 2 2 3 4 3 4 6 5 4 3 1 4 2)))
-(define test (remove-duplicates-stream instream))
-(display test)
-test
-(stream-cdr test)
-(stream-cdr (stream-cdr test))
-(stream-cdr (stream-cdr (stream-cdr test)))
-(stream-cdr (stream-cdr (stream-cdr (stream-cdr test))))
-(stream-cdr (stream-cdr (stream-cdr (stream-cdr (stream-cdr test)))))
-
-(define (remove-duplicates lst)
-  (cond ((null? lst) '())
-        ((not (memqa (car lst) (cdr lst)))
-         (cons (car lst) (remove-duplicates (cdr lst))))
-        (else (remove-duplicates (cdr lst)))))
-
-(define (memqa item x)
-  (cond ((null? x) #f)
-        ((eq? item (car x)) x)
-        (else (memqa item (cdr x)))))
-(define test (remove-duplicates '(1 2 4 3 3 4 2 1 1 2 3 3 2)))
-test
+;;2c) Du vil få et stort problem med uendelige strømmer.
+;; Den vil aldri stoppe å søke etter duplikater. Evt at du får listen ut baklengs
 
 ;;2d)
 
+(define seen-it-before?
+  (lambda (item)
+    (let ((seen '()))
+      (if (member item seen) #f (begin (set! seen (cons item seen)) #t)))))
+           
 (define (remove-duplicates stream)
   (if (stream-null? stream)
       the-empty-stream
-      (cons-stream (stream-car stream)
-                   (stream-filter <???>
+      (cons-stream (begin (seen-it-before? (stream-car stream)) (stream-car stream))
+                   (stream-filter seen-it-before?
                                   (stream-cdr stream)))))
-(define a (remove-duplicates (list-to-stream '(1 2 4 3 3 4 2 1 1 2 3 3 2))))
-a
-(stream-cdr a)
+
+;;2e) Hver gang vi kaller på x, (stream-cdr x) og videre ned strømmen, vil (apply proc....)
+;; hele tiden utføre sin oppgave som er å kjøre show. Show returnerer verdien til x, og som
+;; erstatter lenken fra cons-cellen som tidligere gikk til (apply proc ....)
+
+;;2f)
+(define (mull-streams s1 s2)
+  (stream-map * s1 s2))
+(mull-streams (stream-interval 1 4) (stream-interval 2 5))
+
+(define factorials
+  (cons-stream (stream-car nats)
+              (mull-streams nats factorials)))
