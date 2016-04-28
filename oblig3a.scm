@@ -102,16 +102,17 @@
 ;;2d)
 
 (define seen-it-before?
-  (lambda (item)
-    (let ((seen '()))
-      (if (member item seen) #f (begin (set! seen (cons item seen)) #t)))))
+  (let ((seen '()))
+    (lambda (item)
+      (if (not (member item seen))
+          (begin (set! seen (cons item seen)) #t)
+          #f))))
            
 (define (remove-duplicates stream)
   (if (stream-null? stream)
       the-empty-stream
       (cons-stream (begin (seen-it-before? (stream-car stream)) (stream-car stream))
-                   (stream-filter seen-it-before?
-                                  (stream-cdr stream)))))
+                   (stream-filter seen-it-before? (stream-cdr stream)))))
 
 ;;2e) Hver gang vi kaller på x, (stream-cdr x) og videre ned strømmen, vil (apply proc....)
 ;; hele tiden utføre sin oppgave som er å kjøre show. Show returnerer verdien til x, og som
@@ -120,7 +121,6 @@
 ;;2f)
 (define (mull-streams s1 s2)
   (stream-map * s1 s2))
-(mull-streams (stream-interval 1 4) (stream-interval 2 5))
 
 (define factorials
   (cons-stream (stream-car nats)
