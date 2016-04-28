@@ -101,16 +101,21 @@
 ;;2d)
 (define seen '())
 (define seen-it-before?
-  (lambda (item)
-    (let ((seen '()))
-      (if (member item seen) #f (begin (set! seen (cons item seen)) #t)))))
+  (let ((seen '()))
+    (lambda (item)
+      (if (not (member item seen))
+          (begin (set! seen (cons item seen)) #t)
+          #f))))
            
 (define (remove-duplicates stream)
   (if (stream-null? stream)
       the-empty-stream
       (cons-stream (begin (seen-it-before? (stream-car stream)) (stream-car stream))
-                   (stream-filter seen-it-before?
-                                  (stream-cdr stream)))))
+                   (stream-filter seen-it-before? (stream-cdr stream)))))
+
+(define a (remove-duplicates (list-to-stream '(1 1 1 2 4 3 3 4 2 1 1 2 3 3 2))))
+(stream-ref a 1)
+(stream-ref a 3)
 
 (define a (remove-duplicates (list-to-stream '(1 1 1 2 4 3 3 4 2 1 1 2 3 3 2))))
 (stream-ref a 1)
