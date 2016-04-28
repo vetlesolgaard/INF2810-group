@@ -1,30 +1,11 @@
 (load "prekode3a.scm")
 
-
-(define (memoize f)
-  (let ((table (make-table)))
-    (lambda (x)
-      (let ((previously-computed-result (lookup x table)))
-        (or previously-computed-result
-            (let ((result (f x)))
-              (insert! x result table)
-              result))))))
-
-(define memo-fib
-  (memoize (lambda (n)
-             (display "computing fib of ")
-             (display n) (newline)
-             (cond ((= n 0) 0)
-                   ((= n 1) 1)
-                   (else (+ (memo-fib (- n 1))
-                            (memo-fib (- n 2))))))))
-
 ;;1a)
 (define (mem message proc)
   (cond ((eq? message 'memoize)
          (let ((table (make-table)))
            (lambda args
-             (display args)(newline)
+             
              (cond ((and (not(null? args)) (eq? (car args) 'unmemoize)) proc)
                    (else
                     (let ((prev-result (lookup args table)))
@@ -36,6 +17,39 @@
         ((eq? message 'unmemoize) (proc 'unmemoize))
         (else (display "unknown command"))))
 
+#|(define (mem message proc)
+    (let ((table (make-table)))
+      (lambda args
+        (cond ((and (eq? message 'memoize) (not(null? args)) (eq? (car args) 'unmemoize)) (display (car args))proc)
+              ((eq? message 'memoize)
+               (let ((prev-result (lookup args table)))
+                 (or prev-result
+                     (let ((result (apply proc args)))
+                       (insert! args result table)
+                       result))))
+              
+              ((eq? message 'unmemoize) (proc 'unmemoize))
+              (else (display "unknown command"))))))|#
+(display "1a) (set! fib (mem 'memoize fib)) og 4 fib kall med argumentene 3,3,2 og 4")
+(newline)
+(set! fib (mem 'memoize fib))
+(fib 3)
+(fib 3)
+(fib 2)
+(fib 4)
+(newline)
+(display "1b) (set! fib (mem 'unmemoize fib)) etterfulgt av 2 fib kall med argumentet 3")
+(newline)
+(set! fib (mem 'unmemoize fib))
+(fib 3)
+(fib 3)
+
+(set! test-proc (mem 'memoize test-proc))
+(test-proc)
+(test-proc)
+(test-proc 40 41 42 43 44)
+(test-proc 40 41 42 43 44)
+(test-proc 42 43 44)
 ;;1c)
 ;;Problemet her er at fib peker ikke tilbake på mem-fib, den peker til fibutregningen,
 ;;og vil bare ha tilgang til å sjekke tabellen 1 gang hver gang vi kaller mem-fib.
@@ -58,11 +72,19 @@
       (display time)
       (display " ")
       (display title)
-      (display "."))))
+      (display ".")(newline))))
+(newline)
+(display "1d)")
+(display " greet 0 args")(newline)
+(greet)
+(display "greet 2 args: 'time evening")(newline)
+(greet 'time "evening")
+(display "greet 4 args: 'title sir 'time morning")(newline)
+(greet 'title "sir" 'time "morning")
+(display "greet 4 args: 'time afternoon 'title dear")(newline)
+(greet 'time "afternoon" 'title "dear")
 
 ;;2a)
-(define list '(1 2 3 4 5))
-
 (define list-to-stream
   (lambda (args)
     (if (null? args)
@@ -79,6 +101,21 @@
           (else (cons
                  (stream-car stream)
                  (stream-to-list (stream-cdr stream) (- (car count) 1)))))))
+(newline)
+(display "2a) Lager en test-list '(1 2 3 4 5)")(newline)
+(define test-list '(1 2 3 4 5))
+test-list
+(display "list-to-stream test-list")(newline)
+(define test-stream (list-to-stream test-list))
+test-stream
+(display "stream-cdr")(newline)
+(stream-cdr test-stream)
+(display "stream-to-list (stream-interval 10 20)")(newline)
+(stream-to-list (stream-interval 10 20))
+(display "show-stream nats 15")(newline)
+(show-stream nats 15)
+(display "stream-to-list nats 10")(newline)
+(stream-to-list nats 10)
 ;;2b)
 (define empty-streams?
   (lambda (args)
@@ -93,13 +130,26 @@
        (apply proc (map stream-car argstreams))
        (apply stream-map
               (cons proc (map stream-cdr argstreams))))))
+(newline)
+(display "2b)")(newline)
+(display "x = (stream-interval 10 20")(newline)
+(define x (stream-interval 10 20))
+(display "y = (list-to-stream '(1 2 3 4 6))") (newline)
+(define y (list-to-stream '(1 2 3 4 6)))
+(display "streampluss (stream-map + x y y)")(newline)
+(define streampluss (stream-map + x y y))
+(display "10 + 1 + 1")(newline)
+streampluss
+(display "11 + 2 + 2")(newline)
+(stream-cdr streampluss)
 
 
 ;;2c) Du vil få et stort problem med uendelige strømmer.
 ;;Den vil aldri stoppe å søke etter duplikater.
+;;evt feil rekkefølge også, men det er ikke et stort problem
 
 ;;2d)
-(define seen '())
+
 (define seen-it-before?
   (let ((seen '()))
     (lambda (item)
@@ -112,14 +162,17 @@
       the-empty-stream
       (cons-stream (begin (seen-it-before? (stream-car stream)) (stream-car stream))
                    (stream-filter seen-it-before? (stream-cdr stream)))))
-
-(define a (remove-duplicates (list-to-stream '(1 1 1 2 4 3 3 4 2 1 1 2 3 3 2))))
+(newline)
+(display "2d)")(newline)
+(display "duplicatelist '(1 1 1 2 4 3 3 4 2 1 1 2 3 3 2)")(newline)
+(define duplicatelist '(1 1 1 2 4 3 3 4 2 1 1 2 3 3 2))
+(display "a = (remove-duplicates (list-to-stream duplicatelist))")(newline)
+(define a (remove-duplicates (list-to-stream duplicatelist)))
+(display "stream-ref a 1")(newline)
 (stream-ref a 1)
-(stream-ref a 3)
+(display "stream-ref a 2")(newline)
+(stream-ref a 2)
 
-(define a (remove-duplicates (list-to-stream '(1 1 1 2 4 3 3 4 2 1 1 2 3 3 2))))
-(stream-ref a 1)
-(stream-ref a 3)
 
 ;;2e) Hver gang vi kaller på x, (stream-cdr x) og videre ned strømmen, vil (apply proc....)
 ;; hele tiden utføre sin oppgave som er å kjøre show. Show returnerer verdien til x, og som
@@ -132,3 +185,7 @@
 (define factorials
   (cons-stream (stream-car nats)
               (mull-streams nats factorials)))
+(newline)
+(display "2f)")(newline)
+(display "stream-ref factorials 5")
+(stream-ref factorials 5)
