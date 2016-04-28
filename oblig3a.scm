@@ -1,5 +1,3 @@
-
-
 (load "prekode3a.scm")
 
 
@@ -63,6 +61,7 @@
       (display "."))))
 
 ;;2a)
+(define list '(1 2 3 4 5))
 
 (define list-to-stream
   (lambda (args)
@@ -97,10 +96,10 @@
 
 
 ;;2c) Du vil få et stort problem med uendelige strømmer.
-;; Den vil aldri stoppe å søke etter duplikater. Evt at du får listen ut baklengs
+;;Den vil aldri stoppe å søke etter duplikater.
 
 ;;2d)
-
+(define seen '())
 (define seen-it-before?
   (lambda (item)
     (let ((seen '()))
@@ -113,6 +112,10 @@
                    (stream-filter seen-it-before?
                                   (stream-cdr stream)))))
 
+(define a (remove-duplicates (list-to-stream '(1 1 1 2 4 3 3 4 2 1 1 2 3 3 2))))
+(stream-ref a 1)
+(stream-ref a 3)
+
 ;;2e) Hver gang vi kaller på x, (stream-cdr x) og videre ned strømmen, vil (apply proc....)
 ;; hele tiden utføre sin oppgave som er å kjøre show. Show returnerer verdien til x, og som
 ;; erstatter lenken fra cons-cellen som tidligere gikk til (apply proc ....)
@@ -120,7 +123,6 @@
 ;;2f)
 (define (mull-streams s1 s2)
   (stream-map * s1 s2))
-(mull-streams (stream-interval 1 4) (stream-interval 2 5))
 
 (define factorials
   (cons-stream (stream-car nats)
