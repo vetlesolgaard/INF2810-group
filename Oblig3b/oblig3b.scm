@@ -64,6 +64,50 @@
         
         ))
 
+;;3a)
+
+(define (eval-special-form exp env)
+  (cond ((quoted? exp) (text-of-quotation exp))
+        ((assignment? exp) (eval-assignment exp env))
+        ((definition? exp) (eval-definition exp env))
+        ((if? exp) (eval-if exp env))
+        ((lambda? exp)
+         (make-procedure (lambda-parameters exp)
+                         (lambda-body exp)
+                         env))
+        ((begin? exp) 
+         (eval-sequence (begin-actions exp) env))
+        ((cond? exp) (mc-eval (cond->if exp) env))
+        ((and? exp) (eval-and (cdr exp) env)) ;; NEW
+        ((or? exp) (eval-or (cdr exp) env)))) ;;NEW
+
+(define (special-form? exp)
+  (cond ((quoted? exp) #t)
+        ((assignment? exp) #t)
+        ((definition? exp) #t)
+        ((if? exp) #t)
+        ((lambda? exp) #t)
+        ((begin? exp) #t)
+        ((cond? exp) #t)
+        ((and? exp) #t) ;; NEW
+        ((or? exp) #t) ;; NEW
+        (else #f)))
+
+(define (and? exp) (tagged-list? exp 'and)) ;; NEW
+
+(define (eval-and exp env) ;; NEW
+  (cond ((null? exp) #t)
+        ((not (true? (mc-eval (car exp) env))) #f)
+        (else (eval-and (cdr exp) env)))) 
+
+(define (or? exp) (tagged-list? exp 'or)) ;; NEW
+
+(define (eval-or exp env) ;; NEW
+  (cond ((null? exp) #f)
+        ((true? (mc-eval (car exp) env)) #t)
+        (else (eval-or (cdr exp) env))))
+
+
 (set! the-global-environment (setup-environment))
 (primitive-procedure-objects)
 (install-primitives! 'apekatt (lambda (x) (* x x)))
