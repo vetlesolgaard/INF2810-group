@@ -1,8 +1,8 @@
 (load "evaluator.scm")
 (set! the-global-environment (setup-environment))
 (mc-eval '(+ 1 2) the-global-environment)
-(define bar 40)
-(read-eval-print-loop)
+(mc-eval '(define foo (lambda (x) (* x x))) the-global-environment)
+;;(read-eval-print-loop)
 
 
 ;;1a) Hver gang vi lager et nytt kall på en funksjon, (exp), blir exp sent inn til mc-eval
@@ -12,7 +12,66 @@
 ;; funksjonen cond som den skal utføres, og bindingen til tallet som blir sendt inn i foo,
 ;; blir ignorert.
 
-;;2a)  (list '1+ (lambda (x) (+ x 1)))
-;;(list '1- (lambda (x) (- x 1)))
+;;2a)
+;;
+#|(define primitive-procedures
+  (list (list 'car car)
+        (list 'cdr cdr)
+        (list 'cons cons)
+        (list 'null? null?)
+        (list 'not not)
+        (list '+ +)
+        (list '- -)
+        (list '* *)
+        (list '/ /)
+        (list '= =)
+        (list 'eq? eq?)
+        (list 'equal? equal?)
+        (list 'display 
+              (lambda (x) (display x) 'ok))
+        (list 'newline 
+              (lambda () (newline) 'ok))
+;;      her kan vi legge til flere primitiver.
+        (list '1+ (lambda (x) (+ x 1)))
+        (list '1- (lambda (x) (- x 1)))
+        ))|#
 
 ;;2b)
+
+(define (install-primitives! proc func)
+  (define-variable! proc (list 'primitive func) the-global-environment)
+  )
+
+(define primitive-procedures
+  (list (list 'car car)
+        (list 'cdr cdr)
+        (list 'cons cons)
+        (list 'null? null?)
+        (list 'not not)
+        (list '+ +)
+        (list '- -)
+        (list '* *)
+        (list '/ /)
+        (list '= =)
+        (list 'eq? eq?)
+        (list 'equal? equal?)
+        (list 'display 
+              (lambda (x) (display x) 'ok))
+        (list 'newline 
+              (lambda () (newline) 'ok))
+;;      her kan vi legge til flere primitiver.
+        (list 'install-primitives! install-primitives! )
+        
+        ))
+
+(set! the-global-environment (setup-environment))
+(primitive-procedure-objects)
+(install-primitives! 'apekatt (lambda (x) (* x x)))
+(primitive-procedure-objects)
+
+
+the-global-environment
+
+(mc-eval '(apekatt 4) the-global-environment)
+(read-eval-print-loop)
+
