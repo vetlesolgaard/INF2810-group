@@ -14,33 +14,9 @@
 
 ;;2a)
 ;;
-#|(define primitive-procedures
-  (list (list 'car car)
-        (list 'cdr cdr)
-        (list 'cons cons)
-        (list 'null? null?)
-        (list 'not not)
-        (list '+ +)
-        (list '- -)
-        (list '* *)
-        (list '/ /)
-        (list '= =)
-        (list 'eq? eq?)
-        (list 'equal? equal?)
-        (list 'display 
-              (lambda (x) (display x) 'ok))
-        (list 'newline 
-              (lambda () (newline) 'ok))
-;;      her kan vi legge til flere primitiver.
-        (list '1+ (lambda (x) (+ x 1)))
-        (list '1- (lambda (x) (- x 1)))
-        ))|#
-
-;;2b)
-
 (define (install-primitives! proc func)
   (define-variable! proc (list 'primitive func) the-global-environment)
-  )
+  );;install primitives = 2b)
 
 (define primitive-procedures
   (list (list 'car car)
@@ -60,9 +36,15 @@
         (list 'newline 
               (lambda () (newline) 'ok))
 ;;      her kan vi legge til flere primitiver.
-        (list 'install-primitives! install-primitives! )
-        
+        (list '1+ (lambda (x) (+ x 1)))
+        (list '1- (lambda (x) (- x 1)))
+        (list '< <)
+        (list '> >)
+           (list 'install-primitives! install-primitives! )
         ))
+
+;;2b)
+
 
 ;;3a)
 
@@ -79,7 +61,9 @@
          (eval-sequence (begin-actions exp) env))
         ((cond? exp) (mc-eval (cond->if exp) env))
         ((and? exp) (eval-and (cdr exp) env)) ;; NEW
-        ((or? exp) (eval-or (cdr exp) env)))) ;;NEW
+        ((or? exp) (eval-or (cdr exp) env));;NEW
+        ((let? exp) (let->lambda exp env));;NEW
+        ((while? exp) (eval-while exp env))));;NEW
 
 (define (special-form? exp)
   (cond ((quoted? exp) #t)
@@ -91,6 +75,8 @@
         ((cond? exp) #t)
         ((and? exp) #t) ;; NEW
         ((or? exp) #t) ;; NEW
+        ((let? exp) #t) ;;NEW
+        ((while? exp) #t);; NEW
         (else #f)))
 
 (define (and? exp) (tagged-list? exp 'and)) ;; NEW
@@ -139,31 +125,7 @@
 
 ;;3c)
 
-(define (eval-special-form exp env)
-  (cond ((quoted? exp) (text-of-quotation exp))
-        ((assignment? exp) (eval-assignment exp env))
-        ((definition? exp) (eval-definition exp env))
-        ((if? exp) (eval-if exp env))
-        ((lambda? exp)
-         (make-procedure (lambda-parameters exp)
-                         (lambda-body exp)
-                         env))
-        ((begin? exp) 
-         (eval-sequence (begin-actions exp) env))
-        ((cond? exp) (mc-eval (cond->if exp) env))
-        ((let? exp) (let->lambda exp env))))
 
-
-(define (special-form? exp)
-  (cond ((quoted? exp) #t)
-        ((assignment? exp) #t)
-        ((definition? exp) #t)
-        ((if? exp) #t)
-        ((lambda? exp) #t)
-        ((begin? exp) #t)
-        ((cond? exp) #t)
-        ((let? exp) #t)
-        (else #f)))
 
 (define (let? exp)
   
@@ -199,7 +161,21 @@
   (let->lambda-1 (cdr exp))))
 ;;(let x = 2 and y = 3 in (+ x y))
 
-the-global-environment
+;;3e)
+(define (while? exp)
+  (tagged-list? exp 'while))
+
+(define (eval-while exp env)
+  (let ((body (cons 'begin (cddr exp)))
+        (pred (cadr exp)))
+    
+    (define (while)
+      (if (mc-eval pred env)
+          (begin (mc-eval body env) (while))
+          'done))
+   (while)))
+
+(set! the-global-environment (setup-environment))
 
 (mc-eval '(apekatt 4) the-global-environment)
 (newline)(display "Oppgave 3b")(newline)
