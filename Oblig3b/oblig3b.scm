@@ -96,15 +96,18 @@
 (define (and? exp) (tagged-list? exp 'and)) ;; NEW
 
 (define (eval-and exp env) ;; NEW
-  (cond ((null? exp) #t)
-        ((not (true? (mc-eval (car exp) env))) #f)
-        (else (eval-and (cdr exp) env)))) 
+  (let ((last-true (mc-eval (car exp) env)))
+    (display value)
+    (cond ((not (true? value)) #f)
+          ((null? (cdr exp)) last-true)
+          (else (set! last-true value)(eval-and (cdr exp) env))))
+    )
 
 (define (or? exp) (tagged-list? exp 'or)) ;; NEW
 
 (define (eval-or exp env) ;; NEW
   (cond ((null? exp) #f)
-        ((true? (mc-eval (car exp) env)) #t)
+        ((true? (mc-eval (car exp) env)) (mc-eval (car exp) env))
         (else (eval-or (cdr exp) env))))
 
 
