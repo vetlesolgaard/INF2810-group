@@ -137,6 +137,68 @@
       (execute-then exp env)
       (parser (cddddr exp) env)))
 
+;;3c)
+
+(define (eval-special-form exp env)
+  (cond ((quoted? exp) (text-of-quotation exp))
+        ((assignment? exp) (eval-assignment exp env))
+        ((definition? exp) (eval-definition exp env))
+        ((if? exp) (eval-if exp env))
+        ((lambda? exp)
+         (make-procedure (lambda-parameters exp)
+                         (lambda-body exp)
+                         env))
+        ((begin? exp) 
+         (eval-sequence (begin-actions exp) env))
+        ((cond? exp) (mc-eval (cond->if exp) env))
+        ((let? exp) (let->lambda exp env))))
+
+
+(define (special-form? exp)
+  (cond ((quoted? exp) #t)
+        ((assignment? exp) #t)
+        ((definition? exp) #t)
+        ((if? exp) #t)
+        ((lambda? exp) #t)
+        ((begin? exp) #t)
+        ((cond? exp) #t)
+        ((let? exp) #t)
+        (else #f)))
+
+(define (let? exp)
+  
+  (tagged-list? exp 'let))
+
+(define (let-exp exp)
+  (if (null? (cdr exp))
+      (cons (cadar exp) '())
+      (cons (cadar exp) (let-exp (cdr exp)))))
+  
+(define (let-var exp)
+  (if (null? (cdr exp))
+      (cons (caar exp) '())
+      (cons (caar exp) (let-var (cdr exp)))))
+
+(define (let->lambda exp env)
+  (mc-eval (cons (list 'lambda (let-var (cadr exp)) (cons 'begin (cddr exp))) (let-exp (cadr exp))) env)
+  )
+
+;;3d)
+(define (let-body exp)
+   (cons 'begin (cddddr exp)))
+
+(define (let->lambda exp env)
+  (let ((vars '())
+        (exps '())
+        )
+      (define (let->lambda-1 exp)
+        (set! vars (cons (car exp) vars))
+        (set! exps (cons (caddr exp) exps))
+        (cond ((eq? 'and (cadddr exp))(let->lambda-1 (cddddr exp)))
+              ((eq? 'in (cadddr exp))(mc-eval (cons (list 'lambda vars (let-body exp)) exps) env))))
+  (let->lambda-1 (cdr exp))))
+;;(let x = 2 and y = 3 in (+ x y))
+
 the-global-environment
 
 (mc-eval '(apekatt 4) the-global-environment)
