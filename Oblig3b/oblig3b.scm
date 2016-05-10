@@ -70,7 +70,7 @@
   (cond ((quoted? exp) (text-of-quotation exp))
         ((assignment? exp) (eval-assignment exp env))
         ((definition? exp) (eval-definition exp env))
-        ((if? exp) (eval-if exp env))
+        ((if? exp) (eval-new-if exp env))
         ((lambda? exp)
          (make-procedure (lambda-parameters exp)
                          (lambda-body exp)
@@ -113,9 +113,37 @@
 (install-primitives! 'apekatt (lambda (x) (* x x)))
 (primitive-procedure-objects)
 
+;; Oppgave 3b)
+(define (else? exp) ;; NEW
+  (eq? (car exp) 'else))
+
+(define (execute-then exp env) ;; NEW
+  (if (eq? (caddr exp) 'then)
+      (mc-eval (cadddr exp) env)
+      (display "SYNTAX ERROR")))
+
+(define (elsif-test exp env) ;; NEW
+  (if (eq? (car exp) 'elsif)
+      (mc-eval (cadr exp) env)
+      (display "SYNTAX ERROR"))) 
+
+(define (eval-new-if exp env) ;; NEW
+  (define (parser exp env)
+    (cond ((else? exp) (mc-eval (cadr exp) env))
+          ((true? (elsif-test exp env)) (execute-then exp env))
+          (else (parser (cddddr exp) env))))
+  (if (true? (mc-eval (if-predicate exp) env))      
+      (execute-then exp env)
+      (parser (cddddr exp) env)))
 
 the-global-environment
 
 (mc-eval '(apekatt 4) the-global-environment)
+(newline)(display "Oppgave 3b")(newline)
+(mc-eval '(if (= 1 2) then 1 elsif (= 1 3) then 2 else 3) the-global-environment)
+(mc-eval '(if (= 1 1) then 1 else 2) the-global-environment)
+
 (read-eval-print-loop)
+
+
 
