@@ -97,11 +97,9 @@
 
 (define (eval-and exp env) ;; NEW
   (let ((last-true (mc-eval (car exp) env)))
-    (display value)
     (cond ((not (true? value)) #f)
           ((null? (cdr exp)) last-true)
-          (else (set! last-true value)(eval-and (cdr exp) env))))
-    )
+          (else (set! last-true value)(eval-and (cdr exp) env)))))
 
 (define (or? exp) (tagged-list? exp 'or)) ;; NEW
 
